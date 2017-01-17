@@ -290,7 +290,6 @@
 #include "functions\BotHumanization\ClanActions.au3"
 #include "functions\BotHumanization\ClanWarActions.au3"
 
-
 ;OLD CODE
 
 ;#include "functions\Image Search\THSearch.au3"
