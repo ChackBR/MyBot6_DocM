@@ -334,7 +334,6 @@ $x += 38
 	GUICtrlSetLimit(-1, 2)
 	GUICtrlSetOnEvent(-1, "lblTotalCountLava")
 
-
 Local $x = 30
 $y += 66
 	GUICtrlCreateIcon($pIconLib, $eIcnCamp, $x - 10, $y - 15, 24, 24)

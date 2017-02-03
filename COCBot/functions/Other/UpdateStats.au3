@@ -245,7 +245,7 @@ Func UpdateStats()
 
 	If $iOldSkippedVillageCount <> $iSkippedVillageCount Then
 		GUICtrlSetData($lblresultvillagesskipped, _NumberFormat($iSkippedVillageCount, True))
-		If $ichkSwitchAcc <> 1 Then GUICtrlSetData($lblResultSkippedHourNow, _NumberFormat($iSkippedVillageCount, True))
+		If $ichkSwitchAcc <> 1 Then GUICtrlSetData($lblResultSkippedHourNow, _NumberFormat($iSkippedVillageCount, True))		; SwitchAcc Mode unchecked - Demen
 		$iOldSkippedVillageCount = $iSkippedVillageCount
 	EndIf
 
@@ -448,6 +448,7 @@ Func UpdateStats()
 	EndIf
 
 	If $ichkSwitchAcc = 1 Then UpdateStatsForSwitchAcc()	;	SwitchAcc Mode - Demen
+
 	If $ResetStats = 1 Then
 		$ResetStats = 0
 	EndIf
