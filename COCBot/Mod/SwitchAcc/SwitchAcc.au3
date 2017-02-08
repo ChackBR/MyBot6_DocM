@@ -11,6 +11,7 @@
 ; ===============================================================================================================================
 
 Global $iAttackedCountSwitch
+Global $ActiveSwitchCounter = 0
 
 Func InitiateSwitchAcc() ; Checking profiles setup in Mybot, First matching CoC Acc with current profile, Reset all Timers relating to Switch Acc Mode.
 
@@ -173,11 +174,17 @@ Func SwitchProfile($SwitchCase) 										; Switch profile (1 = Active, 2 = Dona
 
    $nCurProfile = _GUICtrlComboBox_GetCurSel($cmbProfile)+1
    $aDonateProfile = _ArrayFindAll($aProfileType, 2)
+   $aActiveProfile = _ArrayFindAll($aProfileType, 1)
 
    Switch $SwitchCase
    Case 1
+	  If $DonateSwitchCounter >= UBound($aDonateProfile) And UBound($aDonateProfile) > 0 Then		; Fix 08/02/2017
+		  $nNexProfile = $aActiveProfile[$ActiveSwitchCounter] + 1
+		  $DonateSwitchCounter = 0
+	  EndIf
 	  Setlog("Switch to active Profile ["& $nNexProfile & "] - " & $ProfileList[$nNexProfile] & " (Acc. " & $aMatchProfileAcc[$nNexProfile-1] & ")")
 	  _GUICtrlComboBox_SetCurSel($cmbProfile, $nNexProfile - 1)
+	  $ActiveSwitchCounter += 1
 	  cmbProfile()
 
    Case 2
@@ -220,6 +227,7 @@ Func CheckSwitchAcc(); Switch CoC Account with or without sleep combo - DEMEN
 
 	Local $SwitchCase
 	Local $aDonateProfile = _ArrayFindAll($aProfileType, 2)
+	Local $aActiveProfile = _ArrayFindAll($aProfileType, 1)
 
 	SetLog("Start SwitchAcc Mode")
 
@@ -253,22 +261,20 @@ Func CheckSwitchAcc(); Switch CoC Account with or without sleep combo - DEMEN
 		MinRemainTrainAcc()
 
 		If $ichkSmartSwitch = 1 And _ArraySearch($aProfileType, 1) <> -1 Then		; Smart switch and there is at least 1 active profile
-			If $nMinRemainTrain <= 0 Then
+			If $nMinRemainTrain <= 0 And $ActiveSwitchCounter < UBound($aActiveProfile) Then
 				If $nCurProfile <> $nNexProfile Then
 					$SwitchCase = 1
 				Else
 					$SwitchCase = 3
 				EndIf
+				$ActiveSwitchCounter += 1
+				$DonateSwitchCounter = 0
 			Else
 				If $DonateSwitchCounter < UBound($aDonateProfile) Then
 					$SwitchCase = 2
 				Else
-					If $nCurProfile <> $nNexProfile Then
-						$SwitchCase = 1
-					Else
-						$SwitchCase = 3
-					EndIf
-					$DonateSwitchCounter = 0
+					$ActiveSwitchCounter = 0
+					$SwitchCase = 1
 				EndIf
 			EndIf
 		Else
@@ -281,7 +287,7 @@ Func CheckSwitchAcc(); Switch CoC Account with or without sleep combo - DEMEN
 				RequestCC(true)
 			EndIf
 			SwitchProfile($SwitchCase)
-			checkMainScreen()
+			If IsMainPage() = False Then checkMainScreen()
 			SwitchCOCAcc()
 		Else
 			SwitchProfile($SwitchCase)
@@ -296,6 +302,8 @@ Func CheckSwitchAcc(); Switch CoC Account with or without sleep combo - DEMEN
 			EndIf
 			PoliteCloseCoC()
 			$iShouldRearm = True
+			$NotNeedAllTime[0] = 1
+			$NotNeedAllTime[1] = 1
 			If $ichkCloseTraining = 2 Then CloseAndroid("SwitchAcc")
 			EnableGuiControls() ; enable emulator menu controls
 			SetLog("Enable emulator menu controls due long wait time!")
@@ -405,21 +413,24 @@ Func SwitchCOCAcc()
 					Setlog("   5. Click OKAY")
 					ExitLoop
 				Else
-					If _Sleepstatus(900) Then Return
+					If _Sleep(900) Then Return
 					$idx3 = $idx3 + 1
 					If $idx2 = 10 Then SwitchFail_runBot()
 				EndIf
 			WEnd
 
 			Setlog("please wait for loading CoC")
-			checkMainScreen()
 			$bReMatchAcc = False
 			$iShouldRearm = True
+			$NotNeedAllTime[0] = 1
+			$NotNeedAllTime[1] = 1
 			$iAttackedCountSwitch = $iAttackedVillageCount[0] + $iAttackedVillageCount[1] + $iAttackedVillageCount[2] +$iAttackedVillageCount[3]
+
+			If IsMainPage(80) Then ExitLoop		; Waiting for fully load CoC in 8 sec
 			ExitLoop
 
 		Else
-			If _Sleepstatus(900) Then Return
+			If _Sleep(900) Then Return
 			$idx += 1
 			If $idx = 15 Then SwitchFail_runBot()
 

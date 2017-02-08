@@ -217,6 +217,7 @@ $iGUIEnabled = 1
 $ichkVersion = 0
 CheckVersion() ; check latest version on mybot.run site
 
+btnUpdateProfile()	;	SwitchAcc DEMEN
 
 $sMsg = GetTranslated(500, 9, "Android Shield not available for %s", @OSVersion)
 If $AndroidShieldEnabled = False Then
